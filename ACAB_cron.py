@@ -3,12 +3,14 @@ import sys
 import time
 import os
 import string
+import yaml
+from collections import  OrderedDict
 
 target_host='tutturu.party'
 username='a.kulyashov'
 ls=[]
 
-#connection and getting ls in /etc/ with cron grep
+#connection and getting ls of /etc/ with cron grep
 with fabric.Connection(host=str(target_host), user=str(username), port=22) as conn:
 	ls_cron=conn.run('ls -p /etc/ | grep cron', hide=True)
 	ls_output=ls_cron.stdout
@@ -57,6 +59,11 @@ with fabric.Connection(host=str(target_host), user=str(username), port=22) as co
 						cron_week=cron_task[4]
 						cron_user=cron_task[5]
 						cron_job=cron_task[6]
-						yml_file.write("cron:\n	"+'name: '+str(target_file)+'\n	'+'minute: '+str(cron_min)+'\n	'+'hour: '+str(cron_hour)+'\n	'+'day: '+str(cron_day)+'\n	'+'month: '+str(cron_month)+'\n	'+'weekday: '+str(cron_week)+'\n	'+'user: '+str(cron_user)+'\n	'+'job: '+str(cron_job)+'\n')
+						cron_params = ['name','minute','hour','day','month','weekday','user','job']
+						cron_vars=[str(target_file),str(cron_min),str(cron_hour),str(cron_day),str(cron_month),str(cron_week),str(cron_user),str(cron_job)]
+						cron_dict = {'cron':dict(zip(cron_params, cron_vars))}
+						yml_file.write(yaml.dump(cron_dict,default_flow_style=False,width=1000))
+
+						#yml_file.write("cron:\n	"+'name: '+str(target_file)+'\n	'+'minute: '+str(cron_min)+'\n	'+'hour: '+str(cron_hour)+'\n	'+'day: '+str(cron_day)+'\n	'+'month: '+str(cron_month)+'\n	'+'weekday: '+str(cron_week)+'\n	'+'user: '+str(cron_user)+'\n	'+'job: '+str(cron_job)+'\n')
 				
 				
